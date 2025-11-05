@@ -1,0 +1,173 @@
+
+================================================================================
+RELATÓRIO TÉCNICO - RECONHECIMENTO DE DÍGITOS COM MLP
+================================================================================
+
+Data: 05/11/2025 22:51:01
+
+================================================================================
+1. DESCRIÇÃO DO TRABALHO
+================================================================================
+
+Este trabalho implementa uma Rede Neural Perceptron Multicamadas (MLP) para 
+reconhecimento de dígitos manuscritos (0-9) utilizando o dataset digits do 
+scikit-learn. O objetivo é avaliar o desempenho da rede sob diferentes 
+configurações e sua robustez à presença de ruído nas imagens.
+
+Dataset: 1797 imagens de 8x8 pixels (64 características)
+Divisão: 1257 treino (69.9%) / 540 teste (30.1%)
+
+================================================================================
+2. RESULTADOS - EXPERIMENTO 1: VARIAÇÃO DE NEURÔNIOS
+================================================================================
+
+Configuração: 1 camada oculta com número variável de neurônios
+Taxa de aprendizado: 0.01
+Função de ativação: ReLU
+Iterações máximas: 500
+
+
+TABELA 1: Impacto do número de neurônios
+
+Neurônios | Sem Ruído | Com Ruído | Degradação
+----------|-----------|-----------|------------
+      16 | 0.9537    | 0.8537    | 10.00%
+      32 | 0.9648    | 0.8944    | 7.04%
+      64 | 0.9741    | 0.9389    | 3.52%
+     128 | 0.9759    | 0.9333    | 4.26%
+     256 | 0.9815    | 0.9556    | 2.59%
+
+Observações:
+- Melhor desempenho sem ruído: 256 neurônios (0.9815)
+- Melhor desempenho com ruído: 256 neurônios (0.9556)
+- Menor degradação: 256 neurônios (2.59%)
+
+================================================================================
+3. RESULTADOS - EXPERIMENTO 2: VARIAÇÃO DE CAMADAS
+================================================================================
+
+TABELA 2: Impacto do número de camadas ocultas
+
+Configuração      | Camadas | Sem Ruído | Com Ruído
+------------------|---------|-----------|----------
+            (64,) |       1 | 0.9741    | 0.9222
+         (64, 32) |       2 | 0.9796    | 0.9426
+         (64, 64) |       2 | 0.9796    | 0.9389
+    (128, 64, 32) |       3 | 0.9722    | 0.9407
+(128, 128, 64, 32) |       4 | 0.9704    | 0.9389
+
+Melhor configuração: (64, 32) com acurácia 0.9796
+
+Observações:
+- Aumento de camadas pode levar a overfitting em datasets pequenos
+- Configurações simples frequentemente têm melhor generalização
+
+================================================================================
+4. RESULTADOS - EXPERIMENTO 3: TAXA DE APRENDIZADO
+================================================================================
+
+TABELA 3: Impacto da taxa de aprendizado
+
+Taxa Aprendizado | Iterações | Sem Ruído | Com Ruído
+-----------------|-----------|-----------|----------
+           0.001 |       154 | 0.9704    | 0.9204
+           0.005 |        70 | 0.9685    | 0.9407
+           0.010 |        63 | 0.9741    | 0.9259
+           0.050 |       115 | 0.9574    | 0.7519
+           0.100 |        80 | 0.6463    | 0.3759
+           0.500 |        54 | 0.1000    | 0.1000
+
+Melhor taxa: 0.010 com acurácia 0.9741
+
+Observações:
+- Taxa muito baixa: convergência lenta
+- Taxa muito alta: instabilidade no treinamento
+- Taxa ideal: equilíbrio entre velocidade e estabilidade
+
+================================================================================
+5. RESULTADOS - EXPERIMENTO 4: ROBUSTEZ AO RUÍDO
+================================================================================
+
+TABELA 4: Desempenho sob diferentes níveis de ruído
+
+Nível Ruído | Acurácia | Degradação vs. Original
+------------|----------|------------------------
+        0.0 | 0.9778   |   0.00%
+        0.5 | 0.9741   |   0.37%
+        1.0 | 0.9685   |   0.93%
+        1.5 | 0.9611   |   1.67%
+        2.0 | 0.9444   |   3.33%
+        2.5 | 0.9352   |   4.26%
+        3.0 | 0.9056   |   7.22%
+        4.0 | 0.8426   |  13.52%
+        5.0 | 0.7222   |  25.56%
+
+Observações:
+- Acurácia sem ruído: 0.9778
+- Acurácia com ruído moderado (2.0): 0.9444
+- A rede mantém >85% de acurácia até ruído nível 3.0
+
+================================================================================
+6. RESPOSTAS ÀS QUESTÕES
+================================================================================
+
+Q1: Como o ruído afetou a capacidade da rede de reconhecer os dígitos?
+
+R: O ruído degradou a acurácia de forma progressiva. Com ruído de desvio 
+padrão 2.0, a degradação foi de aproximadamente 3.3%. 
+A rede mantém robustez razoável até níveis moderados de ruído (σ ≤ 2.5), 
+mas o desempenho cai significativamente com ruído mais intenso.
+
+Q2: O aumento do número de camadas melhorou o desempenho?
+
+R: Nem sempre. Para este dataset pequeno (1797 amostras), configurações 
+mais simples (1-2 camadas) apresentaram melhor desempenho que arquiteturas 
+mais profundas. Redes muito profundas tendem a overfitting em datasets 
+limitados. A melhor configuração foi (64, 32).
+
+Q3: A taxa de aprendizado influenciou a convergência?
+
+R: Sim, significativamente. Taxas muito baixas (0.001) exigiram mais 
+iterações, enquanto taxas muito altas (0.5) causaram instabilidade. 
+A taxa ótima foi 0.010, proporcionando convergência rápida 
+e estável em 63 iterações.
+
+Q4: A rede conseguiu reconhecer imagens que não faziam parte do treino?
+
+R: Sim, a rede generalizou bem para o conjunto de teste (30% dos dados), 
+alcançando acurácia de 0.9778. Isso demonstra boa capacidade de 
+generalização, mesmo com imagens não vistas durante o treinamento.
+
+================================================================================
+7. CONCLUSÕES
+================================================================================
+
+1. O MLP demonstrou excelente capacidade de reconhecimento de dígitos, 
+   com acurácia superior a 95% no conjunto de teste limpo.
+
+2. A robustez ao ruído é satisfatória para aplicações práticas, mantendo 
+   desempenho aceitável até níveis moderados de distorção.
+
+3. Configurações mais simples frequentemente superam redes profundas em 
+   datasets pequenos, evidenciando a importância do balanço entre 
+   complexidade e dados disponíveis.
+
+4. A taxa de aprendizado é um hiperparâmetro crítico que afeta tanto a 
+   velocidade quanto a qualidade da convergência.
+
+5. A interface gráfica desenvolvida permite testar o modelo em tempo real, 
+   facilitando a visualização do impacto do ruído nas predições.
+
+================================================================================
+8. RECOMENDAÇÕES PARA TRABALHOS FUTUROS
+================================================================================
+
+- Testar com datasets maiores (MNIST completo)
+- Implementar data augmentation para melhorar robustez
+- Explorar diferentes funções de ativação (tanh, sigmoid, leaky ReLU)
+- Adicionar regularização (dropout, L2) para prevenir overfitting
+- Implementar early stopping baseado em conjunto de validação
+
+================================================================================
+FIM DO RELATÓRIO
+================================================================================
